@@ -14,10 +14,7 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 dotenv.config();
-mongoose.connect(process.env.MONGO_URI);
-console.log(process.env.MONGO_URI, {
-  useNewUrlParser: true
-});
+mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true});
 
 /** # SCHEMAS and MODELS #
 /*  ====================== */
@@ -43,8 +40,16 @@ console.log(process.env.MONGO_URI, {
 // `default` values. See the [mongoose docs](http://mongoosejs.com/docs/guide.html).
 
 // <Your code here >
+const Schema = mongoose.Schema;
 
-var Person /* = <Your Model> */
+var PersonSchema = new Schema({
+  name: {type: String, required: true},
+  age: {type: Number, required: true},
+  favoriteFoods: [String]
+});/* = <Your Model> */
+
+var Person = mongoose.model('Person', PersonSchema);
+//console.log(Person);
 
 // **Note**: GoMix is a real server, and in real servers interactions with
 // the db are placed in handler functions, to be called when some event happens
@@ -81,11 +86,22 @@ var Person /* = <Your Model> */
 //    ...do your stuff here...
 // });
 
-var createAndSavePerson = function(done) {
-  
-  done(null /*, data*/);
+// var user1 = new Person({name: "Julian", age: 32, favoriteFoods: ['Fries','Pizza']});
+// //console.log(user1.name, user1.age, user1.favoriteFoods);
+// user1.save(function(err){
+//   if(err) throw err;
+//   console.log('Person has been created')
+// })
 
+var createAndSavePerson = function(done) {
+  var user = new Person({name: "Julian", age: 32, favoriteFoods: ['Fries','Pizza']});
+  user.save(function(err,data){
+    if(err) return done(err);
+    console.log(`${data.name} has been created`)
+    done(null, data);
+  });
 };
+
 
 /** 4) Create many People with `Model.create()` */
 
@@ -97,9 +113,11 @@ var createAndSavePerson = function(done) {
 // 'arrayOfPeople'.
 
 var createManyPeople = function(arrayOfPeople, done) {
-    
-    done(null/*, data*/);
-    
+    Person.create(arrayOfPeople, function(err,data){
+      if(err) return done(err);
+      console.log(`${data.length} persons have been created`)
+      done(null, data);
+    });
 };
 
 /** # C[R]UD part II - READ #
@@ -114,9 +132,11 @@ var createManyPeople = function(arrayOfPeople, done) {
 // Use the function argument `personName` as search key.
 
 var findPeopleByName = function(personName, done) {
-  
-  done(null/*, data*/);
-
+  Person.find({name: personName}, function(err, data){
+    if(err) return done(err);
+    console.log(`${data.length} ${personName}'s have been found`)
+    done(null, data);
+  });
 };
 
 /** 6) Use `Model.findOne()` */
